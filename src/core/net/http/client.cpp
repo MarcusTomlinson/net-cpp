@@ -20,10 +20,21 @@
 #include <core/net/http/client.h>
 #include <core/net/http/content_type.h>
 
+#include <boost/archive/iterators/base64_from_binary.hpp>
+#include <boost/archive/iterators/binary_from_base64.hpp>
+#include <boost/archive/iterators/transform_width.hpp>
+#include <boost/archive/iterators/ostream_iterator.hpp>
+
 #include <sstream>
 
 namespace net = core::net;
 namespace http = net::http;
+namespace bai = boost::archive::iterators;
+
+namespace
+{
+static const std::string BASE64_PADDING[] = { "", "==", "=" };
+}
 
 http::Client::Errors::HttpMethodNotSupported::HttpMethodNotSupported(
         http::Method method,
@@ -85,4 +96,50 @@ std::string http::Client::uri_to_string(const core::net::Uri& uri) const
 
     // We're done
     return s.str();
+}
+
+std::string http::Client::base64_encode(const std::string& s) const
+{
+    std::stringstream os;
+
+    // convert binary values to base64 characters
+    typedef bai::base64_from_binary
+    // retrieve 6 bit integers from a sequence of 8 bit bytes
+    <bai::transform_width<const char *, 6, 8> > base64_enc;
+
+    std::copy(base64_enc(s.c_str()), base64_enc(s.c_str() + s.size()),
+            std::ostream_iterator<char>(os));
+
+    os << BASE64_PADDING[s.size() % 3];
+
+    return os.str();
+}
+
+std::string http::Client::base64_decode(const std::string& s) const
+{
+    std::stringstream os;
+
+    typedef bai::transform_width<bai::binary_from_base64<const char *>, 8, 6> base64_dec;
+
+    unsigned int size = s.size();
+
+    // Remove the padding characters
+    // See: https://svn.boost.org/trac/boost/ticket/5629
+    if (size && s[size - 1] == '=')
+    {
+        --size;
+        if (size && s[size - 1] == '=')
+        {
+            --size;
+        }
+    }
+    if (size == 0)
+    {
+        return std::string();
+    }
+
+    std::copy(base64_dec(s.data()), base64_dec(s.data() + size),
+            std::ostream_iterator<char>(os));
+
+    return os.str();
 }

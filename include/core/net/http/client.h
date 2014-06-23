@@ -104,10 +104,10 @@ public:
     virtual std::string url_escape(const std::string& s) const = 0;
 
     /** @brief Base64-encodes the given string. */
-    virtual std::string base64_encode(const std::string& s) const = 0;
+    virtual std::string base64_encode(const std::string& s) const;
 
     /** @brief Base64-decodes the given string. */
-    virtual std::string base64_decode(const std::string& s) const = 0;
+    virtual std::string base64_decode(const std::string& s) const;
 
     /** @brief Queries timing statistics over all requests that have been executed by this client. */
     virtual Timings timings() = 0;
