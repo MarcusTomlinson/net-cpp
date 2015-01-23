@@ -88,7 +88,11 @@ public:
         if (atomic_state.load() != core::net::http::Request::State::ready)
             throw core::net::http::Request::Errors::AlreadyActive{CORE_FROM_HERE()};
 
-        easy.set_option(::curl::Option::timeout_ms, timeout.count());
+        // timeout.count() is a long long, but curl uses varargs and wants a long.
+        // If timeout.count() overflows a long, we wait forever instead of roughly 24.8 days.
+        auto count = timeout.count();
+        long adjusted_timeout = count <= std::numeric_limits<long>::max() ? count : 0;
+        easy.set_option(::curl::Option::timeout_ms, adjusted_timeout);
     }
 
     Response execute(const Request::ProgressHandler& ph)
