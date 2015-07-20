@@ -1,3 +1,9 @@
+net-cpp (2.0.0) wily; urgency=medium
+
+  * Bump major revision to account for toolchain update. Fixes lp:1452333.
+
+ -- Thomas Voß <thomas.voss@canonical.com>  Mon, 20 Jul 2015 21:11:18 +0200
+
 net-cpp (1.2.0+15.04.20150415.2-0ubuntu1) vivid; urgency=medium
 
   [ Thomas Voß ]
