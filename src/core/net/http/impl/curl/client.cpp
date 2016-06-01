@@ -36,6 +36,11 @@ namespace bai = boost::archive::iterators;
 namespace
 {
 const std::string BASE64_PADDING[] = { "", "==", "=" };
+template<typename To, typename From>
+To cast_without_overflow(From from)
+{
+    return static_cast<To>(std::min<From>(std::numeric_limits<To>::max(), from));
+}
 }
 
 http::impl::curl::Client::Client()
@@ -121,6 +126,8 @@ std::shared_ptr<http::impl::curl::Request> http::impl::curl::Client::head_impl(c
                       configuration.ssl.verify_host ? ::curl::easy::enable_ssl_host_verification : ::curl::easy::disable);
     handle.set_option(::curl::Option::ssl_verify_peer,
                       configuration.ssl.verify_peer ? ::curl::easy::enable : ::curl::easy::disable);
+    handle.set_option(::curl::Option::low_speed_limit, cast_without_overflow<long>(configuration.speed.limit));
+    handle.set_option(::curl::Option::low_speed_time, cast_without_overflow<long>(configuration.speed.duration.count()));
 
     if (configuration.authentication_handler.for_http)
     {
@@ -142,6 +149,8 @@ std::shared_ptr<http::impl::curl::Request> http::impl::curl::Client::get_impl(co
                       configuration.ssl.verify_host ? ::curl::easy::enable_ssl_host_verification : ::curl::easy::disable);
     handle.set_option(::curl::Option::ssl_verify_peer,
                       configuration.ssl.verify_peer ? ::curl::easy::enable : ::curl::easy::disable);
+    handle.set_option(::curl::Option::low_speed_limit, cast_without_overflow<long>(configuration.speed.limit));
+    handle.set_option(::curl::Option::low_speed_time, cast_without_overflow<long>(configuration.speed.duration.count()));
 
     if (configuration.authentication_handler.for_http)
     {
@@ -167,6 +176,8 @@ std::shared_ptr<http::impl::curl::Request> http::impl::curl::Client::post_impl(
                       configuration.ssl.verify_host ? ::curl::easy::enable_ssl_host_verification : ::curl::easy::disable);
     handle.set_option(::curl::Option::ssl_verify_peer,
                       configuration.ssl.verify_peer ? ::curl::easy::enable : ::curl::easy::disable);
+    handle.set_option(::curl::Option::low_speed_limit, cast_without_overflow<long>(configuration.speed.limit));
+    handle.set_option(::curl::Option::low_speed_time, cast_without_overflow<long>(configuration.speed.duration.count()));
 
     if (configuration.authentication_handler.for_http)
     {
@@ -200,6 +211,8 @@ std::shared_ptr<http::impl::curl::Request> http::impl::curl::Client::post_impl(
                       configuration.ssl.verify_host ? ::curl::easy::enable_ssl_host_verification : ::curl::easy::disable);
     handle.set_option(::curl::Option::ssl_verify_peer,
                       configuration.ssl.verify_peer ? ::curl::easy::enable : ::curl::easy::disable);
+    handle.set_option(::curl::Option::low_speed_limit, cast_without_overflow<long>(configuration.speed.limit));
+    handle.set_option(::curl::Option::low_speed_time, cast_without_overflow<long>(configuration.speed.duration.count()));
 
     if (configuration.authentication_handler.for_http)
     {
@@ -231,6 +244,8 @@ std::shared_ptr<http::impl::curl::Request> http::impl::curl::Client::put_impl(
                       configuration.ssl.verify_host ? ::curl::easy::enable_ssl_host_verification : ::curl::easy::disable);
     handle.set_option(::curl::Option::ssl_verify_peer,
                       configuration.ssl.verify_peer ? ::curl::easy::enable : ::curl::easy::disable);
+    handle.set_option(::curl::Option::low_speed_limit, cast_without_overflow<long>(configuration.speed.limit));
+    handle.set_option(::curl::Option::low_speed_time, cast_without_overflow<long>(configuration.speed.duration.count()));
 
     if (configuration.authentication_handler.for_http)
     {
@@ -252,6 +267,8 @@ std::shared_ptr<http::impl::curl::Request> http::impl::curl::Client::del_impl(co
                       configuration.ssl.verify_host ? ::curl::easy::enable_ssl_host_verification : ::curl::easy::disable);
     handle.set_option(::curl::Option::ssl_verify_peer,
                       configuration.ssl.verify_peer ? ::curl::easy::enable : ::curl::easy::disable);
+    handle.set_option(::curl::Option::low_speed_limit, cast_without_overflow<long>(configuration.speed.limit));
+    handle.set_option(::curl::Option::low_speed_time, cast_without_overflow<long>(configuration.speed.duration.count()));
 
     if (configuration.authentication_handler.for_http)
     {

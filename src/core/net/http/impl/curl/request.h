@@ -242,7 +242,6 @@ public:
                 case Request::Progress::Next::abort_operation: result = 1; break;
                 case Request::Progress::Next::continue_operation: result = 0; break;
                 }
-
                 return result;
             });
         }
@@ -275,26 +274,32 @@ public:
     }
 
     void pause()
-    {   
-        try
-        {   
-            easy.pause();
-        } catch(const std::system_error& se)
-        {   
-            throw core::net::http::Error(se.what(), CORE_FROM_HERE());
-        }       
+    {
+        auto copy = easy;
+        multi.dispatch([copy]() mutable
+        {
+            try
+            {
+                copy.pause();
+            }
+            catch(...) {}
+        });
+
     }       
 
     void resume()
-    {   
-        try
-        {   
-            easy.resume();
-        } catch(const std::system_error& se)
-        {   
-            throw core::net::http::Error(se.what(), CORE_FROM_HERE());
-        }       
-    }       
+    {
+        auto copy = easy;
+        multi.dispatch([copy]() mutable
+        {
+            try
+            {
+                copy.resume();
+            }
+            catch(...) {}
+
+        });
+    }
 
     std::string url_escape(const std::string& s)
     {
@@ -304,15 +309,6 @@ public:
     std::string url_unescape(const std::string& s)
     {
         return easy.unescape(s);
-    }
-
-    void abort_request_if(std::uint64_t limit, const std::chrono::seconds& time)
-    {
-        if (atomic_state.load() != core::net::http::Request::State::ready)
-            throw core::net::http::Request::Errors::AlreadyActive{CORE_FROM_HERE()};
-    
-        easy.set_option(::curl::Option::low_speed_limit, limit);
-        easy.set_option(::curl::Option::low_speed_time, time.count());
     }
 
 private:

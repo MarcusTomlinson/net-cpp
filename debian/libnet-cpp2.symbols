@@ -1,4 +1,4 @@
-libnet-cpp.so.1 libnet-cpp1 #MINVER#
+libnet-cpp.so.2 libnet-cpp2 #MINVER#
  (c++)"core::net::http::make_client()@Base" 0.0.1+14.10.20140611
  (c++)"core::net::http::make_streaming_client()@Base" 1.1.0+15.04.20150305-0ubuntu1
  (c++)"core::net::make_uri(std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > > > const&, std::vector<std::pair<std::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::basic_string<char, std::char_traits<char>, std::allocator<char> > > > > const&)@Base" 1.1.0+14.10.20140804

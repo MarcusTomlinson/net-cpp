@@ -451,7 +451,7 @@ void easy::Handle::pause()
 void easy::Handle::resume()
 {
     if (!d) throw easy::Handle::HandleHasBeenAbandoned{};
-    throw_if_not<curl::Code::ok>(easy::native::pause(native(), CURLPAUSE_RECV_CONT), [this]() { return std::string{d->error};});
+    throw_if_not<curl::Code::ok>(easy::native::pause(native(), CURLPAUSE_CONT), [this]() { return std::string{d->error};});
 }
 
 // URL escapes the given input string.

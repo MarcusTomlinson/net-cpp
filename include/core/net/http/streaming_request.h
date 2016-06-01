@@ -53,18 +53,6 @@ public:
      * @return The response to the request.
      */
     virtual void async_execute(const Handler& handler, const DataHandler& dh) = 0;
-
-    /**
-    * @brief Pause the request
-    * @throw core::net::http::Error in case of http-related errors.
-    */
-    virtual void pause() = 0;
-  
-    /**
-    * @brief Resume the request
-    * @throw core::net::http::Error in case of http-related errors.
-    */
-    virtual void resume() = 0;
 };
 }
 }
