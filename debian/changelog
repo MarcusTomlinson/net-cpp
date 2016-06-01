@@ -1,17 +1,16 @@
-net-cpp (2.0.0) UNRELEASED; urgency=medium
+net-cpp (2.0.0+15.04.20160601.1-0ubuntu1) vivid; urgency=medium
 
+  [ Thomas Voß ]
   [Gary Wang]
   * Enable pause/resume of requests.
   * Fix LP:#1570686 and LP:#1570687
+  * * Enable pause/resume of requests.
 
- -- Thomas Voß <thomas.voss@canonical.com>  Tue, 31 May 2016 22:49:32 +0200
+  [ Gary.Wang<gary@canonical.com>, Gary.Wang ]
+  * 1.Fix crash issue when sending large chunk data via PUT method
+    (lp:1570686) (LP: #1570686, #1570687)
 
-net-cpp (1.2.0+15.04.20150415.2-0ubuntu1) vivid; urgency=medium
-
-  [ Thomas Voß ]
-  * Introduce a streaming http interface.
-
- -- CI Train Bot <ci-train-bot@canonical.com>  Wed, 15 Apr 2015 12:34:49 +0000
+ -- Thomas Voß <thomas.voss@canonical.com>  Wed, 01 Jun 2016 15:05:17 +0000
 
 net-cpp (1.1.0+15.04.20150305-0ubuntu1) vivid; urgency=medium
 
