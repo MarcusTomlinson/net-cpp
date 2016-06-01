@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Authored by: Thomas Voß <thomas.voss@canonical.com>
+ *              Gary Wang  <gary.wang@canonical.com>
  */
 #ifndef CORE_NET_HTTP_STREAMING_REQUEST_H_
 #define CORE_NET_HTTP_STREAMING_REQUEST_H_
@@ -52,6 +53,18 @@ public:
      * @return The response to the request.
      */
     virtual void async_execute(const Handler& handler, const DataHandler& dh) = 0;
+
+    /**
+    * @brief Pause the request
+    * @throw core::net::http::Error in case of http-related errors.
+    */
+    virtual void pause() = 0;
+  
+    /**
+    * @brief Resume the request
+    * @throw core::net::http::Error in case of http-related errors.
+    */
+    virtual void resume() = 0;
 };
 }
 }

@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Authored by: Thomas Voß <thomas.voss@canonical.com>
+ *              Gary Wang  <gary.wang@canonical.com>
  */
 #ifndef CORE_NET_HTTP_IMPL_CURL_EASY_H_
 #define CORE_NET_HTTP_IMPL_CURL_EASY_H_
@@ -136,7 +137,10 @@ enum class Option
     timeout_ms = CURLOPT_TIMEOUT_MS,
     ssl_engine_default = CURLOPT_SSLENGINE_DEFAULT,
     ssl_verify_peer = CURLOPT_SSL_VERIFYPEER,
-    ssl_verify_host = CURLOPT_SSL_VERIFYHOST
+    ssl_verify_host = CURLOPT_SSL_VERIFYHOST,
+    customrequest = CURLOPT_CUSTOMREQUEST,
+    low_speed_limit = CURLOPT_LOW_SPEED_LIMIT,
+    low_speed_time = CURLOPT_LOW_SPEED_TIME
 };
 
 namespace native
@@ -208,6 +212,9 @@ void cleanup(Handle handle);
 
 // Executes the operation configured on the handle.
 ::curl::Code perform(Handle handle);
+
+// Executes pause operation on the handle.
+::curl::Code pause(Handle handle, int bitmask);
 
 // URL escapes the given input string.
 std::string escape(Handle handle, const std::string& in);
@@ -338,6 +345,12 @@ public:
 
     // Executes the operation associated with this handle.
     void perform();
+
+    // Executes pause operation associated with this handle.
+    void pause();
+
+    // Executes resume operation associated with this handle.
+    void resume();
 
     // URL escapes the given input string.
     std::string escape(const std::string& in);

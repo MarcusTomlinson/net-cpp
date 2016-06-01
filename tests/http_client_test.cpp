@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Authored by: Thomas Voß <thomas.voss@canonical.com>
+ *              Gary Wang  <gary.wang@canonical.com>
  */
 
 #include <core/net/error.h>
@@ -30,6 +31,7 @@
 #include <json/json.h>
 
 #include <future>
+#include <fstream>
 
 namespace http = core::net::http;
 namespace json = Json;
@@ -456,6 +458,33 @@ TEST(HttpClient, post_form_request_for_existing_resource_succeeds)
     EXPECT_EQ("test", root["form"]["test"].asString());
 }
 
+TEST(HttpClient, post_request_for_file_with_large_chunk_succeeds)
+{
+    auto client = http::make_client();
+    auto url = std::string(httpbin::host) + httpbin::resources::post();
+
+    // create temp file with large chunk
+    const std::size_t size = 1024*1024;
+    std::ofstream ofs("tmp.dat", std::ios::binary | std::ios::out);
+    ofs.seekp(size);
+    ofs.write("", 1);
+    ofs.close();
+
+    std::ifstream payload("tmp.dat");
+    auto request = client->post(http::Request::Configuration::from_uri_as_string(url),
+                                payload,
+                                size);
+
+    json::Value root;
+    json::Reader reader;
+
+    auto response = request->execute(default_progress_reporter);
+
+    EXPECT_EQ(core::net::http::Status::ok, response.status);
+    EXPECT_TRUE(reader.parse(response.body, root));
+    EXPECT_EQ(url, root["url"].asString());
+}
+
 TEST(HttpClient, put_request_for_existing_resource_succeeds)
 {
     auto client = http::make_client();
@@ -476,6 +505,50 @@ TEST(HttpClient, put_request_for_existing_resource_succeeds)
     EXPECT_EQ(core::net::http::Status::ok, response.status);
     EXPECT_TRUE(reader.parse(response.body, root));
     EXPECT_EQ(payload.str(), root["data"].asString());
+}
+
+TEST(HttpClient, put_request_for_file_with_large_chunk_succeeds)
+{
+    auto client = http::make_client();
+    auto url = std::string(httpbin::host) + httpbin::resources::put();
+
+    // create temp file with large chunk
+    const std::size_t size = 1024*1024;
+    std::ofstream ofs("tmp.dat", std::ios::binary | std::ios::out);
+    ofs.seekp(size);
+    ofs.write("", 1);
+    ofs.close();
+
+    std::ifstream payload("tmp.dat");
+    auto request = client->put(http::Request::Configuration::from_uri_as_string(url),
+                               payload,
+                               size);
+
+    json::Value root;
+    json::Reader reader;
+
+    auto response = request->execute(default_progress_reporter);
+
+    EXPECT_EQ(core::net::http::Status::ok, response.status);
+    EXPECT_TRUE(reader.parse(response.body, root));
+    EXPECT_EQ(url, root["url"].asString());
+}
+
+TEST(HttpClient, del_request_for_existing_resource_succeeds)
+{
+    auto client = http::make_client();
+    auto url = std::string(httpbin::host) + httpbin::resources::del();
+
+    auto request = client->del(http::Request::Configuration::from_uri_as_string(url));
+
+    json::Value root;
+    json::Reader reader;
+
+    auto response = request->execute(default_progress_reporter);
+
+    EXPECT_EQ(core::net::http::Status::ok, response.status);
+    EXPECT_TRUE(reader.parse(response.body, root));
+    EXPECT_EQ(url, root["url"].asString());
 }
 
 namespace com

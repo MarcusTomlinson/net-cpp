@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Authored by: Thomas Voß <thomas.voss@canonical.com>
+ *              Gary Wang  <gary.wang@canonical.com>
  */
 
 #include <core/net/error.h>
@@ -32,6 +33,8 @@
 
 #include <future>
 #include <memory>
+
+#include <fstream>
 
 namespace http = core::net::http;
 namespace json = Json;
@@ -480,6 +483,37 @@ TEST(StreamingHttpClient, post_form_request_for_existing_resource_succeeds)
     EXPECT_EQ("test", root["form"]["test"].asString());
 }
 
+TEST(StreamingHttpClient, post_request_for_file_with_large_chunk_succeeds)
+{
+    using namespace ::testing;
+
+    auto client = http::make_streaming_client();
+    auto url = std::string(httpbin::host) + httpbin::resources::post();
+  
+    // create temp file with large chunk
+    const std::size_t size = 1024*1024;
+    std::ofstream ofs("tmp.dat", std::ios::binary | std::ios::out);
+    ofs.seekp(size);
+    ofs.write("", 1);
+    ofs.close();
+  
+    std::ifstream payload("tmp.dat");
+    auto request = client->streaming_post(http::Request::Configuration::from_uri_as_string(url),
+                                payload,
+                                size);
+  
+    auto dh = MockDataHandler::create(); EXPECT_CALL(*dh, on_new_data(_)).Times(AtLeast(1));
+  
+    auto response = request->execute(default_progress_reporter, dh->to_data_handler());
+  
+    json::Value root;
+    json::Reader reader;
+
+    EXPECT_EQ(core::net::http::Status::ok, response.status);
+    EXPECT_TRUE(reader.parse(response.body, root));
+    EXPECT_EQ(url, root["url"].asString());
+}
+
 TEST(StreamingHttpClient, put_request_for_existing_resource_succeeds)
 {
     using namespace ::testing;
@@ -497,12 +531,66 @@ TEST(StreamingHttpClient, put_request_for_existing_resource_succeeds)
     // Our mocked data handler.
     auto dh = MockDataHandler::create(); EXPECT_CALL(*dh, on_new_data(_)).Times(AtLeast(1));
 
+    auto response = request->execute(default_progress_reporter, dh->to_data_handler());
+
     json::Value root;
     json::Reader reader;
-
-    auto response = request->execute(default_progress_reporter, dh->to_data_handler());
 
     EXPECT_EQ(core::net::http::Status::ok, response.status);
     EXPECT_TRUE(reader.parse(response.body, root));
     EXPECT_EQ(payload.str(), root["data"].asString());
 }
+
+TEST(StreamingHttpClient, put_request_for_file_with_large_chunk_succeeds)
+{
+    using namespace ::testing;
+
+    auto client = http::make_streaming_client();
+    auto url = std::string(httpbin::host) + httpbin::resources::put();
+  
+    // create temp file with large chunk
+    const std::size_t size = 1024*1024;
+    std::ofstream ofs("tmp.dat", std::ios::binary | std::ios::out);
+    ofs.seekp(size);
+    ofs.write("", 1); 
+    ofs.close();
+  
+    std::ifstream payload("tmp.dat");
+    auto request = client->streaming_put(http::Request::Configuration::from_uri_as_string(url),
+                               payload,
+                               size);
+  
+    auto dh = MockDataHandler::create(); EXPECT_CALL(*dh, on_new_data(_)).Times(AtLeast(1));
+
+    auto response = request->execute(default_progress_reporter, dh->to_data_handler());
+  
+    json::Value root;
+    json::Reader reader;
+  
+    EXPECT_EQ(core::net::http::Status::ok, response.status);
+    EXPECT_TRUE(reader.parse(response.body, root));
+    EXPECT_EQ(url, root["url"].asString());
+}
+
+TEST(StreamingHttpClient, del_request_for_existing_resource_succeeds)
+{
+    using namespace ::testing;
+
+    auto client = http::make_streaming_client();
+    auto url = std::string(httpbin::host) + httpbin::resources::del();
+  
+    auto request = client->streaming_del(http::Request::Configuration::from_uri_as_string(url));
+  
+    // Our mocked data handler.
+    auto dh = MockDataHandler::create(); EXPECT_CALL(*dh, on_new_data(_)).Times(AtLeast(1));
+
+    auto response = request->execute(default_progress_reporter, dh->to_data_handler());
+
+    json::Value root;
+    json::Reader reader;
+  
+    EXPECT_EQ(core::net::http::Status::ok, response.status);
+    EXPECT_TRUE(reader.parse(response.body, root));
+    EXPECT_EQ(url, root["url"].asString());
+}
+

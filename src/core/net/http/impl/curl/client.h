@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Authored by: Thomas Voß <thomas.voss@canonical.com>
+ *              Gary Wang  <gary.wang@canonical.com>
  */
 #ifndef CORE_NET_HTTP_IMPL_CURL_CLIENT_H_
 #define CORE_NET_HTTP_IMPL_CURL_CLIENT_H_
@@ -55,19 +56,25 @@ public:
     std::shared_ptr<http::Request> get(const Request::Configuration& configuration) override;
     std::shared_ptr<http::Request> head(const Request::Configuration& configuration) override;
     std::shared_ptr<http::Request> post(const Request::Configuration& configuration, const std::string&, const std::string&) override;
+    std::shared_ptr<http::Request> post(const Request::Configuration& configuration, std::istream& payload, std::size_t size) override;
     std::shared_ptr<http::Request> put(const Request::Configuration& configuration, std::istream& payload, std::size_t size) override;
+    std::shared_ptr<http::Request> del(const Request::Configuration& configuration) override;
 
     std::shared_ptr<http::StreamingRequest> streaming_get(const Request::Configuration& configuration) override;
     std::shared_ptr<http::StreamingRequest> streaming_head(const Request::Configuration& configuration) override;
     std::shared_ptr<http::StreamingRequest> streaming_put(const Request::Configuration& configuration, std::istream& payload, std::size_t size) override;
     std::shared_ptr<http::StreamingRequest> streaming_post(const Request::Configuration& configuration, const std::string& payload, const std::string& type) override;
+    std::shared_ptr<http::StreamingRequest> streaming_post(const Request::Configuration& configuration, std::istream& payload, std::size_t size) override;
     std::shared_ptr<http::StreamingRequest> streaming_post_form(const Request::Configuration& configuration, const std::map<std::string, std::string>& values) override;
+    std::shared_ptr<http::StreamingRequest> streaming_del(const Request::Configuration& configuration) override;
 
 private:
     std::shared_ptr<curl::Request> get_impl(const Request::Configuration& configuration);
     std::shared_ptr<curl::Request> head_impl(const Request::Configuration& configuration);
     std::shared_ptr<curl::Request> post_impl(const Request::Configuration& configuration, const std::string&, const std::string&);
+    std::shared_ptr<curl::Request> post_impl(const Request::Configuration& configuration, std::istream& payload, std::size_t size);
     std::shared_ptr<curl::Request> put_impl(const Request::Configuration& configuration, std::istream& payload, std::size_t size);
+    std::shared_ptr<curl::Request> del_impl(const Request::Configuration& configuration);
 
     ::curl::multi::Handle multi;    
 };

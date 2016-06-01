@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Authored by: Thomas Voß <thomas.voss@canonical.com>
+ *              Gary Wang  <gary.wang@canonical.com>
  */
 #ifndef CORE_NET_HTTP_REQUEST_H_
 #define CORE_NET_HTTP_REQUEST_H_
@@ -248,6 +249,18 @@ public:
     virtual void async_execute(const Handler& handler) = 0;
 
     /**
+     * @brief Pause the request
+     * @throw core::net::http::Error in case of http-related errors.
+     */
+    virtual void pause() = 0;
+
+    /**
+     * @brief Resume the request
+     * @throw core::net::http::Error in case of http-related errors.
+     */
+    virtual void resume() = 0;
+
+    /**
      * @brief Returns the input string in URL-escaped format.
      * @param s The string to be URL escaped.
      */
@@ -258,6 +271,14 @@ public:
      * @param s The string to be URL unescaped.
      */
     virtual std::string url_unescape(const std::string& s) = 0;
+
+    /**
+     * @brief Sets options for aborting the request.
+     * The request will be aborted if transfer speed belows \a limit bytes per second for \a time seconds
+     * @param limit The transfer speed in seconds.
+     * @param time waiting period(seconds) to abort the request.
+     */
+    virtual void abort_request_if(std::uint64_t limit, const std::chrono::seconds& time) = 0;
 
 protected:
     /** @cond */
