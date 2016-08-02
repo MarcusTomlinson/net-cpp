@@ -285,6 +285,11 @@ core::net::http::Client::Timings multi::Handle::timings()
     return result;
 }
 
+void multi::Handle::dispatch(const std::function<void ()> &task)
+{
+    d->dispatcher.post(task);
+}
+
 void multi::Handle::run()
 {
     d->dispatcher.run();

@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Authored by: Thomas Voß <thomas.voss@canonical.com>
+ *              Gary Wang  <gary.wang@canonical.com>
  */
 #ifndef CORE_NET_HTTP_IMPL_CURL_REQUEST_H_
 #define CORE_NET_HTTP_IMPL_CURL_REQUEST_H_
@@ -241,7 +242,6 @@ public:
                 case Request::Progress::Next::abort_operation: result = 1; break;
                 case Request::Progress::Next::continue_operation: result = 0; break;
                 }
-
                 return result;
             });
         }
@@ -273,6 +273,34 @@ public:
         multi.add(easy);
     }
 
+    void pause()
+    {
+        auto copy = easy;
+        multi.dispatch([copy]() mutable
+        {
+            try
+            {
+                copy.pause();
+            }
+            catch(...) {}
+        });
+
+    }       
+
+    void resume()
+    {
+        auto copy = easy;
+        multi.dispatch([copy]() mutable
+        {
+            try
+            {
+                copy.resume();
+            }
+            catch(...) {}
+
+        });
+    }
+
     std::string url_escape(const std::string& s)
     {
         return easy.escape(s);
@@ -282,6 +310,7 @@ public:
     {
         return easy.unescape(s);
     }
+
 private:
     std::atomic<core::net::http::Request::State> atomic_state;
     ::curl::multi::Handle multi;

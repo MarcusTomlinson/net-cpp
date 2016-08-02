@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Authored by: Thomas Voß <thomas.voss@canonical.com>
+ *              Gary Wang  <gary.wang@canonical.com>
  */
 #ifndef CORE_NET_HTTP_REQUEST_H_
 #define CORE_NET_HTTP_REQUEST_H_
@@ -212,6 +213,13 @@ public:
             /** Invoked for querying user credentials to authenticate proxy accesses. */
             AuthenicationHandler for_proxy;
         } authentication_handler;
+
+        /** Encapsulates thresholds for minimum transfer speed in [kB/s] for duration seconds. */
+        struct
+        {
+            std::uint64_t limit{1};
+            std::chrono::seconds duration{std::chrono::seconds{30}};
+        } speed;
     };
 
     Request(const Request&) = delete;
@@ -246,6 +254,19 @@ public:
      * @return The response to the request.
      */
     virtual void async_execute(const Handler& handler) = 0;
+
+    /**
+     * @brief Pause the request with options for aborting the request.
+     * The request will be aborted if transfer speed falls below \a limit in [bytes/second] for \a time seconds.
+     * @throw core::net::http::Error in case of http-related errors.
+     */
+    virtual void pause() = 0;
+
+    /**
+     * @brief Resume the request
+     * @throw core::net::http::Error in case of http-related errors.
+     */
+    virtual void resume() = 0;
 
     /**
      * @brief Returns the input string in URL-escaped format.

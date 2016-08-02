@@ -1,3 +1,16 @@
+net-cpp (2.0.0ubuntu1) UNRELEASED; urgency=medium
+
+  [ Thomas Voß ]
+  [Gary Wang]
+  * Enable pause/resume of requests.
+  * Fix LP:#1570686 and LP:#1570687
+
+  [ Gary Wang ]
+  * Add data reading callback function in streaming http interface.
+  * Fix LP:#1605179
+
+ -- Thomas Voß <thomas.voss@canonical.com>  Thu, 21 Jul 2016 04:05:05 -0700
+
 net-cpp (1.2.0+15.04.20150415.2-0ubuntu1) vivid; urgency=medium
 
   [ Thomas Voß ]

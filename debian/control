@@ -6,10 +6,6 @@ Build-Depends: cmake,
                doxygen,
                google-mock,
                graphviz,
-# We rely on C++11 features, and to prevent from ABI breaks
-# in libstdc++ causing us issues, we explicitly select a G++
-# version.
-               g++-4.9,
                libboost-dev,
                libboost-serialization-dev,
                libboost-system-dev,
@@ -29,7 +25,7 @@ Homepage: https://launchpad.net/net-cpp
 Vcs-Bzr: https://code.launchpad.net/~phablet-team/net-cpp/trunk
 Vcs-Browser: https://bazaar.launchpad.net/~phablet-team/net-cpp/trunk/files
 
-Package: libnet-cpp1
+Package: libnet-cpp2
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends},
@@ -45,7 +41,7 @@ Section: libdevel
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends},
-Depends: libnet-cpp1 (= ${binary:Version}),
+Depends: libnet-cpp2 (= ${binary:Version}),
          ${misc:Depends},
 Description: C++11 library for networking purposes - runtime library
  Net-Cpp is a simple and straightforward networking library for C++11.
