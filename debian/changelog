@@ -1,4 +1,4 @@
-net-cpp (2.1.0-0ubuntu1) UNRELEASED; urgency=medium
+net-cpp (3.0.0+16.10.20160818.2-0ubuntu1) yakkety; urgency=medium
 
   [ Thomas Voß ]
   [Gary Wang]
@@ -9,7 +9,7 @@ net-cpp (2.1.0-0ubuntu1) UNRELEASED; urgency=medium
   * Add data reading callback function in streaming http interface.
   * Fix LP:#1605179
 
- -- Thomas Voß <thomas.voss@canonical.com>  Thu, 21 Jul 2016 04:05:05 -0700
+ -- charles.kerr@canonical.com <charles.kerr@canonical.com>  Thu, 18 Aug 2016 18:17:28 +0000
 
 net-cpp (2.0.0-0ubuntu2) yakkety; urgency=medium
 

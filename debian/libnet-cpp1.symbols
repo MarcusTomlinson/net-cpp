@@ -1,9 +1,9 @@
 libnet-cpp.so.1 libnet-cpp1 #MINVER#
  (c++)"core::net::http::make_client()@Base" 0.0.1+14.10.20140611
  (c++)"core::net::http::make_streaming_client()@Base" 1.1.0+15.04.20150305-0ubuntu1
- (c++)"core::net::http::Client::del(core::net::http::Request::Configuration const&)@Base" 0replaceme
- (c++|arch=i386 powerpc armhf)"core::net::http::Client::post(core::net::http::Request::Configuration const&, std::basic_istream<char, std::char_traits<char> >&, unsigned int)@Base" 0replaceme
- (c++|arch=amd64 ppc64el arm64)"core::net::http::Client::post(core::net::http::Request::Configuration const&, std::basic_istream<char, std::char_traits<char> >&, unsigned long)@Base" 0replaceme 
+ (c++)"core::net::http::Client::del(core::net::http::Request::Configuration const&)@Base" 3.0.0+16.10.20160818.2-0ubuntu1
+ (c++|arch=i386 powerpc armhf)"core::net::http::Client::post(core::net::http::Request::Configuration const&, std::basic_istream<char, std::char_traits<char> >&, unsigned int)@Base" 3.0.0+16.10.20160818.2-0ubuntu1
+ (c++|arch=amd64 ppc64el arm64)"core::net::http::Client::post(core::net::http::Request::Configuration const&, std::basic_istream<char, std::char_traits<char> >&, unsigned long)@Base" 3.0.0+16.10.20160818.2-0ubuntu1 
  (c++)"core::net::make_uri(std::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::vector<std::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::basic_string<char, std::char_traits<char>, std::allocator<char> > > > const&, std::vector<std::pair<std::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::basic_string<char, std::char_traits<char>, std::allocator<char> > > > > const&)@Base" 1.1.0+14.10.20140804
  (c++)"core::net::http::Client::uri_to_string(core::net::Uri const&) const@Base" 1.1.0+14.10.20140804
  (c++)"core::net::http::Client::Errors::HttpMethodNotSupported::HttpMethodNotSupported(core::net::http::Method, core::Location const&)@Base" 0.0.1+14.10.20140611
