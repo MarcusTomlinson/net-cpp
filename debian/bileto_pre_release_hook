@@ -1,0 +1,55 @@
+#!/bin/sh
+
+# Copyright (C) 2015 Canonical Ltd
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License version 3 as
+# published by the Free Software Foundation.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Authored by: Michi Henning <michi.henning@canonical.com>
+#              Thomas Voß <thomas.voss@canonical.com>
+#              Robert Bruce Park <robert.park@canonical.com>
+
+#
+# Script to generate debian files for dual landing in Vivid (gcc 4.9 ABI)
+# and Wily and later (gcc 5 ABI).
+#
+# This script is called from debian/rules and generates:
+#
+# - control
+# - libnet-cpp${soversion}.install
+#
+# For all but control, this is a straight substition and/or renaming exercise for each file.
+#
+
+set -eu  # Fail if any command fails.
+
+dir=$(dirname $0)
+
+[ -n "${SERIES:-}" ] || SERIES="$(lsb_release -c -s)"
+
+# Dump version numbers into files and initialize vars from those files.
+
+if [ "$SERIES" = "vivid" ]; then
+   export NET_CPP_SOVERSION=$(cat ${dir}/VERSION.vivid)
+else
+   export NET_CPP_SOVERSION=$(cat ${dir}/VERSION)
+fi
+
+process()
+{
+    perl -pe 's/@([A-Z_]+)@/$ENV{$1} or die "$1 undefined"/eg' <"$1"
+}
+
+process "$dir/control.in" >"$dir/control"
+process "$dir/libnet-cpp.install.in" > "$dir/libnet-cpp${NET_CPP_SOVERSION}.install"
+
+exit 0

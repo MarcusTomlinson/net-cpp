@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Authored by: Thomas Voß <thomas.voss@canonical.com>
+ *              Gary Wang  <gary.wang@canonical.com>
  */
 #ifndef CORE_NET_HTTP_REQUEST_H_
 #define CORE_NET_HTTP_REQUEST_H_

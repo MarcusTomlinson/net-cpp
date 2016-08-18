@@ -171,6 +171,9 @@ public:
     // Returns the native curl multi instance handle.
     native::Handle native() const;
 
+    // Dispatch dispatches task on the underlying reactor.
+    void dispatch(const std::function<void()>& task);
+
 private:
     struct Private;
     std::shared_ptr<Private> d;

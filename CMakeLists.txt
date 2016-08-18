@@ -14,9 +14,11 @@
 #
 # Authored by: Thomas Voss <thomas.voss@canonical.com>
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
-project(net-cpp)
+project(net-cpp VERSION 2.1.0)
+
+set(NET_CPP_SOVERSION 2 CACHE STRING "The version number from libnet-cpp's SONAME")
 
 find_package(Threads)
 
@@ -25,10 +27,7 @@ include(GNUInstallDirs)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror -Wall -pedantic -Wextra -fvisibility=hidden")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Werror -Wall -fno-strict-aliasing -fvisibility=hidden -fvisibility-inlines-hidden -pedantic -Wextra")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--no-undefined")
-
-set(NET_CPP_VERSION_MAJOR 1)
-set(NET_CPP_VERSION_MINOR 2)
-set(NET_CPP_VERSION_PATCH 0)
+add_definitions(-DBOOST_ERROR_CODE_HEADER_ONLY)
 
 include(CTest)
 

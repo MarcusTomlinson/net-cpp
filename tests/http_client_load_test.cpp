@@ -117,7 +117,7 @@ bool init()
     return true;
 }
 
-static const bool is_initialized = init();
+static const bool is_initialized __attribute__((used)) = init();
 }
 
 TEST_F(HttpClientLoadTest, async_head_request_for_existing_resource_succeeds)

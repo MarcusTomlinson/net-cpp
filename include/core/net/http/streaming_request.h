@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Authored by: Thomas Voß <thomas.voss@canonical.com>
+ *              Gary Wang  <gary.wang@canonical.com>
  */
 #ifndef CORE_NET_HTTP_STREAMING_REQUEST_H_
 #define CORE_NET_HTTP_STREAMING_REQUEST_H_
@@ -52,6 +53,27 @@ public:
      * @return The response to the request.
      */
     virtual void async_execute(const Handler& handler, const DataHandler& dh) = 0;
+
+    /** 
+     * @brief Pause the request with options for aborting the request.
+     * The request will be aborted if transfer speed falls below \a limit in [bytes/second] for \a time seconds.
+     * @throw core::net::http::Error in case of http-related errors.
+     */
+    virtual void pause() = 0;
+    
+    /** 
+     * @brief Resume the request
+     * @throw core::net::http::Error in case of http-related errors.
+     */
+    virtual void resume() = 0;
+  
+    /** 
+     * @brief Sets options for aborting the request.
+     * The request will be aborted if transfer speed belows \a limit bytes per second for \a time seconds
+     * @param limit The transfer speed in seconds.
+     * @param time waiting period(seconds) to abort the request.
+     */
+    virtual void abort_request_if(std::uint64_t limit, const std::chrono::seconds& time) = 0; 
 };
 }
 }

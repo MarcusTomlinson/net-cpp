@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Authored by: Thomas Voß <thomas.voss@canonical.com>
+ *              Gary Wang  <gary.wang@canonical.com>
  */
 
 #include <core/net/error.h>
@@ -32,6 +33,10 @@
 
 #include <future>
 #include <memory>
+
+#include <fstream>
+#include <iomanip>
+#include <iostream>
 
 namespace http = core::net::http;
 namespace json = Json;
@@ -64,15 +69,42 @@ private:
     MockDataHandler() = default;
 };
 
-auto default_progress_reporter = [](const http::Request::Progress& progress)
+class ProgressBar
 {
-    if (progress.download.current > 0. && progress.download.total > 0.)
-        std::cout << "Download progress: " << progress.download.current / progress.download.total << std::endl;
-    if (progress.upload.current > 0. && progress.upload.total > 0.)
-        std::cout << "Upload progress: " << progress.upload.current / progress.upload.total << std::endl;
+public:
+    ProgressBar(std::uint32_t width)
+        : width{width}, out{std::cout}
+    {
+    }
 
+    ~ProgressBar()
+    {
+        out << std::endl;
+    }
+
+    void update(double percentage)
+    {
+        struct CursorState
+        {
+            CursorState(std::ostream& out) : out{out} { out << "\33[?25l"; }
+            ~CursorState()                            { out << "\33[?25h"; }
+            std::ostream& out;
+        } cs{out};
+
+        out << "\r" << "[" << std::setw(width) << std::left << std::setfill(' ') << std::string(percentage * width, '=') << "] " << std::setw(5) << std::fixed << std::setprecision(2) << percentage * 100 << " %" << std::flush;
+    }
+
+private:
+    std::uint32_t width;
+    std::ostream& out;
+};
+
+auto silent_progress_reporter = [](const http::Request::Progress&)
+{
     return http::Request::Progress::Next::continue_operation;
 };
+
+auto default_progress_reporter = silent_progress_reporter;
 
 bool init()
 {
@@ -80,7 +112,7 @@ bool init()
     return true;
 }
 
-static const bool is_initialized = init();
+static const bool is_initialized __attribute__((used)) = init();
 }
 
 TEST(StreamingStreamingHttpClient, head_request_for_existing_resource_succeeds)
@@ -480,6 +512,70 @@ TEST(StreamingHttpClient, post_form_request_for_existing_resource_succeeds)
     EXPECT_EQ("test", root["form"]["test"].asString());
 }
 
+TEST(StreamingHttpClient, post_request_for_file_with_large_chunk_succeeds)
+{
+    using namespace ::testing;
+
+    auto client = http::make_streaming_client();
+    auto url = std::string(httpbin::host) + httpbin::resources::post();
+  
+    // create temp file with large chunk
+    const std::size_t size = 1024*1024;
+    std::ofstream ofs("tmp.dat", std::ios::binary | std::ios::out);
+    ofs.seekp(size);
+    ofs.write("", 1);
+    ofs.close();
+  
+    std::ifstream payload("tmp.dat");
+    auto request = client->streaming_post(http::Request::Configuration::from_uri_as_string(url),
+                                payload,
+                                size);
+  
+    auto dh = MockDataHandler::create(); EXPECT_CALL(*dh, on_new_data(_)).Times(AtLeast(1));
+  
+    auto response = request->execute(default_progress_reporter, dh->to_data_handler());
+  
+    json::Value root;
+    json::Reader reader;
+
+    EXPECT_EQ(core::net::http::Status::ok, response.status);
+    EXPECT_TRUE(reader.parse(response.body, root));
+    EXPECT_EQ(url, root["url"].asString());
+}
+
+TEST(StreamingHttpClient, post_request_for_file_with_large_chunk_with_read_callback)
+{
+    using namespace ::testing;
+
+    auto client = http::make_streaming_client();
+    auto url = std::string(httpbin::host) + httpbin::resources::post();
+  
+    // create temp file with large chunk
+    const std::size_t size = 1024*1024;
+    std::ofstream ofs("tmp.dat", std::ios::binary | std::ios::out);
+    ofs.seekp(size);
+    ofs.write("", 1);
+    ofs.close();
+
+    std::ifstream payload("tmp.dat");
+    auto request = client->streaming_post(http::Request::Configuration::from_uri_as_string(url),
+                                [&payload](void *dest, size_t buf_size) -> size_t {
+                                    return payload.readsome(static_cast<char *>(dest), buf_size);
+                                },
+                                size);
+  
+    auto dh = MockDataHandler::create(); EXPECT_CALL(*dh, on_new_data(_)).Times(AtLeast(1));
+  
+    auto response = request->execute(default_progress_reporter, dh->to_data_handler());
+  
+    json::Value root;
+    json::Reader reader;
+
+    EXPECT_EQ(core::net::http::Status::ok, response.status);
+    EXPECT_TRUE(reader.parse(response.body, root));
+    EXPECT_EQ(url, root["url"].asString());
+}
+
 TEST(StreamingHttpClient, put_request_for_existing_resource_succeeds)
 {
     using namespace ::testing;
@@ -497,12 +593,159 @@ TEST(StreamingHttpClient, put_request_for_existing_resource_succeeds)
     // Our mocked data handler.
     auto dh = MockDataHandler::create(); EXPECT_CALL(*dh, on_new_data(_)).Times(AtLeast(1));
 
+    auto response = request->execute(default_progress_reporter, dh->to_data_handler());
+
     json::Value root;
     json::Reader reader;
-
-    auto response = request->execute(default_progress_reporter, dh->to_data_handler());
 
     EXPECT_EQ(core::net::http::Status::ok, response.status);
     EXPECT_TRUE(reader.parse(response.body, root));
     EXPECT_EQ(payload.str(), root["data"].asString());
 }
+
+TEST(StreamingHttpClient, put_request_for_file_with_large_chunk_succeeds)
+{
+    using namespace ::testing;
+
+    auto client = http::make_streaming_client();
+    auto url = std::string(httpbin::host) + httpbin::resources::put();
+  
+    // create temp file with large chunk
+    const std::size_t size = 1024*1024;
+    std::ofstream ofs("tmp.dat", std::ios::binary | std::ios::out);
+    ofs.seekp(size);
+    ofs.write("", 1); 
+    ofs.close();
+  
+    std::ifstream payload("tmp.dat");
+    auto request = client->streaming_put(http::Request::Configuration::from_uri_as_string(url),
+                               payload,
+                               size);
+  
+    auto dh = MockDataHandler::create(); EXPECT_CALL(*dh, on_new_data(_)).Times(AtLeast(1));
+
+    auto response = request->execute(default_progress_reporter, dh->to_data_handler());
+  
+    json::Value root;
+    json::Reader reader;
+  
+    EXPECT_EQ(core::net::http::Status::ok, response.status);
+    EXPECT_TRUE(reader.parse(response.body, root));
+    EXPECT_EQ(url, root["url"].asString());
+}
+
+TEST(StreamingHttpClient, put_request_for_file_with_large_chunk_with_read_callback)
+{
+    using namespace ::testing;
+
+    auto client = http::make_streaming_client();
+    auto url = std::string(httpbin::host) + httpbin::resources::put();
+  
+    // create temp file with large chunk
+    const std::size_t size = 1024*1024;
+    std::ofstream ofs("tmp.dat", std::ios::binary | std::ios::out);
+    ofs.seekp(size);
+    ofs.write("", 1); 
+    ofs.close();
+  
+    std::ifstream payload("tmp.dat");
+    auto request = client->streaming_put(http::Request::Configuration::from_uri_as_string(url),
+                                [&payload](void *dest, size_t buf_size) -> size_t {
+                                    return payload.readsome(static_cast<char *>(dest), buf_size);
+                                },
+                               size);
+  
+    auto dh = MockDataHandler::create(); EXPECT_CALL(*dh, on_new_data(_)).Times(AtLeast(1));
+
+    auto response = request->execute(default_progress_reporter, dh->to_data_handler());
+  
+    json::Value root;
+    json::Reader reader;
+  
+    EXPECT_EQ(core::net::http::Status::ok, response.status);
+    EXPECT_TRUE(reader.parse(response.body, root));
+    EXPECT_EQ(url, root["url"].asString());
+}
+
+TEST(StreamingHttpClient, del_request_for_existing_resource_succeeds)
+{
+    using namespace ::testing;
+
+    auto client = http::make_streaming_client();
+    auto url = std::string(httpbin::host) + httpbin::resources::del();
+  
+    auto request = client->streaming_del(http::Request::Configuration::from_uri_as_string(url));
+  
+    // Our mocked data handler.
+    auto dh = MockDataHandler::create(); EXPECT_CALL(*dh, on_new_data(_)).Times(AtLeast(1));
+
+    auto response = request->execute(default_progress_reporter, dh->to_data_handler());
+
+    json::Value root;
+    json::Reader reader;
+  
+    EXPECT_EQ(core::net::http::Status::ok, response.status);
+    EXPECT_TRUE(reader.parse(response.body, root));
+    EXPECT_EQ(url, root["url"].asString());
+}
+
+TEST(StreamingHttpClient, request_can_be_paused_and_resumed)
+{
+    using namespace ::testing;
+    // We obtain a default client instance, dispatching to the default implementation.
+    auto client = http::make_streaming_client();
+
+    // Execute the client
+    std::thread worker{[client]() { client->run(); }};
+
+    auto url = "http://archive.ubuntu.com/ubuntu/dists/xenial/main/installer-amd64/current/images/netboot/ubuntu-installer/amd64/linux";
+
+    // The client mostly acts as a factory for http requests.
+    auto request = client->streaming_get(http::Request::Configuration::from_uri_as_string(url));
+
+    // Our mocked data handler.
+    auto dh = MockDataHandler::create(); EXPECT_CALL(*dh, on_new_data(_)).Times(AtLeast(1));
+
+    std::promise<core::net::http::Response> promise;
+    auto future = promise.get_future();
+
+    ProgressBar pb{80};
+
+    //set abort option for the request.
+    request->abort_request_if(1, std::chrono::seconds{30});
+    // We finally execute the query asynchronously.
+    request->async_execute(http::Request::Handler()
+        .on_progress([&pb](const http::Request::Progress& progress)
+        {
+            if (progress.download.current > 0. && progress.download.total > 0.)
+                pb.update(progress.download.current / static_cast<double>(progress.download.total));
+            return http::Request::Progress::Next::continue_operation;
+        })
+        .on_response([&](const core::net::http::Response& response)
+        {
+            promise.set_value(response);
+        })
+        .on_error([&](const core::net::Error& e)
+        {
+            promise.set_exception(std::make_exception_ptr(e));
+        }),
+        dh->to_data_handler());
+
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+
+    request->pause();
+    request->resume();
+
+    try
+    {
+        // This might very well throw.
+        EXPECT_EQ(core::net::http::Status::ok, future.get().status);
+    } catch (const std::exception& e) { FAIL() << e.what(); }
+
+    client->stop();
+
+    // We shut down our worker thread
+    if (worker.joinable())
+        worker.join();    
+}
+

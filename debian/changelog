@@ -1,3 +1,34 @@
+net-cpp (2.1.0-0ubuntu1) UNRELEASED; urgency=medium
+
+  [ Thomas Voß ]
+  [Gary Wang]
+  * Enable pause/resume of requests.
+  * Fix LP:#1570686 and LP:#1570687
+
+  [ Gary Wang ]
+  * Add data reading callback function in streaming http interface.
+  * Fix LP:#1605179
+
+ -- Thomas Voß <thomas.voss@canonical.com>  Thu, 21 Jul 2016 04:05:05 -0700
+
+net-cpp (2.0.0-0ubuntu2) yakkety; urgency=medium
+
+  * No-change rebuild for boost soname change.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 23 Apr 2016 18:46:28 +0000
+
+net-cpp (2.0.0-0ubuntu1) wily; urgency=medium
+
+  * Bump version.
+
+ -- Thomas Voß <thomas.voss@canonical.com>  Tue, 21 Jul 2015 11:44:30 +0200
+
+net-cpp (2.0.0) wily; urgency=medium
+
+  * Bump major revision to account for toolchain update. Fixes LP:#1452333.
+
+ -- Thomas Voß <thomas.voss@canonical.com>  Mon, 20 Jul 2015 21:11:18 +0200
+
 net-cpp (1.2.0+15.04.20150415.2-0ubuntu1) vivid; urgency=medium
 
   [ Thomas Voß ]

@@ -14,7 +14,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Authored by: Thomas Voß <thomas.voss@canonical.com>
+ *              Gary Wang  <gary.wang@canonical.com>
  */
+
+#include "impl/curl/client.h"
 
 #include <core/net/uri.h>
 #include <core/net/http/client.h>
@@ -85,4 +88,29 @@ std::string http::Client::uri_to_string(const core::net::Uri& uri) const
 
     // We're done
     return s.str();
+}
+
+//TODO: Keep abi compatibility in vivid/xenial. 
+//Should be virtual function for the following two methods and move them to impl/curl/client.cpp.
+std::shared_ptr<http::Request> http::Client::post(
+        const http::Request::Configuration& configuration, std::istream& payload, 
+        std::size_t size)
+{
+    auto *curl_client = dynamic_cast<http::impl::curl::Client*>(this);
+    if (curl_client)
+    {
+        return curl_client->post(configuration, payload, size);
+    }
+    throw std::runtime_error("bad cast for curl client");
+}
+
+std::shared_ptr<http::Request> http::Client::del(
+        const http::Request::Configuration& configuration)
+{
+    auto *curl_client = dynamic_cast<http::impl::curl::Client*>(this);
+    if (curl_client)
+    {
+        return curl_client->del(configuration);
+    }
+    throw std::runtime_error("bad cast for curl client");
 }

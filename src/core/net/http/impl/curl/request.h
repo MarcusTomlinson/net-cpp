@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Authored by: Thomas Voß <thomas.voss@canonical.com>
+ *              Gary Wang  <gary.wang@canonical.com>
  */
 #ifndef CORE_NET_HTTP_IMPL_CURL_REQUEST_H_
 #define CORE_NET_HTTP_IMPL_CURL_REQUEST_H_
@@ -241,7 +242,6 @@ public:
                 case Request::Progress::Next::abort_operation: result = 1; break;
                 case Request::Progress::Next::continue_operation: result = 0; break;
                 }
-
                 return result;
             });
         }
@@ -282,6 +282,42 @@ public:
     {
         return easy.unescape(s);
     }
+
+    void pause()
+    {   
+        auto copy = easy;
+        multi.dispatch([copy]() mutable
+        {   
+            try 
+            {   
+                copy.pause();
+            }   
+            catch(...) {}
+        }); 
+    }    
+
+    void resume()
+    {   
+        auto copy = easy;
+        multi.dispatch([copy]() mutable
+        {   
+            try 
+            {   
+                copy.resume();
+            }   
+            catch(...) {}
+        }); 
+    }   
+
+    void abort_request_if(std::uint64_t limit, const std::chrono::seconds& time)
+    {   
+        if (atomic_state.load() != core::net::http::Request::State::ready)
+            throw core::net::http::Request::Errors::AlreadyActive{CORE_FROM_HERE()};
+    
+        easy.set_option(::curl::Option::low_speed_limit, limit);
+        easy.set_option(::curl::Option::low_speed_time, time.count());
+    }
+
 private:
     std::atomic<core::net::http::Request::State> atomic_state;
     ::curl::multi::Handle multi;

@@ -14,6 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Authored by: Thomas Voß <thomas.voss@canonical.com>
+ *              Gary Wang  <gary.wang@canonical.com>
  */
 #ifndef CORE_NET_HTTP_CLIENT_H_
 #define CORE_NET_HTTP_CLIENT_H_
@@ -162,6 +163,24 @@ public:
      * @return An executable instance of class Request.
      */
     virtual std::shared_ptr<Request> post_form(const Request::Configuration& configuration, const std::map<std::string, std::string>& values);
+
+    /**
+     * @brief post is a convenience method for issuing a POST request for the given URI.
+     * @throw Errors::HttpMethodNotSupported if the underlying implementation does not support the pro vided HTTP method.
+     * @param configuration The configuration to issue a get request for.
+     * @param payload The data to be transmitted as part of the POST request.
+     * @param size Size of the payload data in bytes.
+     * @return An executable instance of class Request.
+     */
+    std::shared_ptr<Request> post(const Request::Configuration& configuration, std::istream& payload, std::size_t size);
+
+    /** 
+     * @brief del is a convenience method for issueing a DELETE request for the given URI.
+     * @throw Errors::HttpMethodNotSupported if the underlying implementation does not support the provided HTTP method.
+     * @param configuration The configuration to issue a get request for.
+     * @return An executable instance of class Request.
+     */
+    std::shared_ptr<Request> del(const Request::Configuration& configuration);
 
 protected:
     Client() = default;
